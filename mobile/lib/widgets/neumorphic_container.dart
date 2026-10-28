@@ -49,16 +49,16 @@ class NeumorphicContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           border: border ??
               Border.all(
-                color: NeumorphicThemeColors.darkShadow.withOpacity(0.5),
+                color: NeumorphicThemeColors.darkShadow.withValues(alpha: 0.5),
                 width: 1.0,
               ),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              NeumorphicThemeColors.darkShadow.withOpacity(0.9),
+              NeumorphicThemeColors.darkShadow.withValues(alpha: 0.9),
               bg,
-              NeumorphicThemeColors.lightShadow.withOpacity(0.25),
+              NeumorphicThemeColors.lightShadow.withValues(alpha: 0.25),
             ],
             stops: const [0.0, 0.4, 1.0],
           ),
