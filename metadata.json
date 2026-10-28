@@ -1,0 +1,6 @@
+{
+  "name": "DukaSearch - Hyper-Local Market Discovery",
+  "description": "Hyper-local market discovery for Kampala trade items (Owino, Nakasero, Ndeeba) powered by Flutter, Node.js/Express, Firestore, and Typesense.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
