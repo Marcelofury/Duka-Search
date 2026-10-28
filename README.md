@@ -1,83 +1,123 @@
-# DukaSearch ⚡
-> Hyper-local market discovery mobile app for Kampala trade items (Owino, Nakasero, Ndeeba, Katwe, Kikuubo) powered by Flutter, Node.js/Express, Firebase Cloud Firestore, and Typesense.
+# DukaSearch
 
----
+Hyper-local market discovery platform for Kampala trade items. DukaSearch indexes products from Owino, Nakasero, Ndeeba, Kikuubo, Katwe, and other Kampala trading centers, and serves sub-5-millisecond instant search through Typesense.
 
-## 🏛 System Architecture & Data Flow
+## Architecture
 
-```text
-┌────────────────────────────────────────────────────────┐
-│                   DukaSearch Mobile                     │
-│               (Flutter + Riverpod)                     │
-│                                                        │
-│  [Sunken Search Bar]            [Vendor Add Product]   │
-└────────────┬─────────────────────────────┬─────────────┘
-             │ <5ms Read/Search            │ Write / Auth
-             │ (Scoped Search-Only Key)    │ (Firebase Token)
-             ▼                             ▼
-┌───────────────────────────┐  ┌─────────────────────────┐
-│     Typesense Cloud       │  │  Node.js + Express API  │
-│  (Instant In-Memory Index)│  │ (Firebase Admin SDK)    │
-└────────────▲──────────────┘  └───────────┬─────────────┘
-             │                             │
-             │ Real-Time Dual-Write Sync   │ Persist Document
-             └─────────────────────────────┴─────────────┐
-                                                         ▼
-                                               ┌──────────────────┐
-                                               │ Firebase Cloud   │
-                                               │ Firestore DB     │
-                                               │ (/duka_items)    │
-                                               └──────────────────┘
+```
++-------------------------+        search-only key        +------------------+
+| Flutter mobile client   | ---------------------------> | Typesense Cloud  |
+| (Riverpod + Neumorphic) |                              | in-memory index  |
++-----------+-------------+                              +--------+---------+
+            | write / auth (Firebase ID token)                    ^
+            v                                                    |
++-------------------------+        dual write         +----------+---------+
+| Node.js + Express API   | -----------------------> | Firebase Firestore |
+| Firebase Admin SDK      |   Firestore + Typesense  | /duka_items        |
++-------------------------+                          +--------------------+
 ```
 
----
+- Source of truth: Firebase Cloud Firestore (`/duka_items`).
+- Data processing layer: Node.js + Express with Firebase Admin SDK and Typesense Node SDK.
+- Client layer: Flutter talks directly to Typesense Cloud using a scoped search-only API key for instant search.
+- Write and vendor operations go through the Express backend using Firebase Auth tokens.
 
-## 🎨 Design System: "Violet Dusk Neumorphism"
-- **Primary Background**: `#1E1B2E` (Deep Dusk Violet)
-- **Top-Left Light Shadow**: `#2A2640` (Soft Lavender Tint)
-- **Bottom-Right Dark Shadow**: `#12101C` (Midnight Shadow)
-- **Accents**: `#9D4EDD` (Radiant Electric Purple) & `#00F5D4` (Cyan Glow)
-- **Primary Text**: `#FFFFFF` (Pure High-Contrast White)
-- **Secondary Text**: `#A09ABC` (Muted Violet Gray)
+## Repository layout
 
----
+```
+backend/   Node.js + Express API, Firestore and Typesense sync, seed script
+mobile/    Flutter client with Violet Dusk Neumorphic UI
+src/       Interactive web companion (Vite + React + Tailwind)
+```
 
-## 📂 Project Structure
-- `/backend`: Node.js + Express API server syncing Firestore and Typesense
-  - `src/app.js`: Express routes (`/health`, `POST /api/items`, `DELETE /api/items/:id`)
-  - `src/config/typesense.js`: Typesense client & schema initialization
-  - `src/config/firebase.js`: Firebase Admin SDK initialization
-  - `src/controllers/itemController.js`: Firestore & Typesense sync logic
-  - `scripts/seed.js`: 15 realistic Kampala market trade items seeder
-- `/mobile`: Flutter client application
-  - `lib/theme/neumorphic_theme.dart`: Color palette & typography
-  - `lib/widgets/neumorphic_container.dart`: Reusable raised & sunken 3D container
-  - `lib/services/typesense_search_service.dart`: Typesense search client (<5ms instant search)
-  - `lib/screens/duka_search_home_screen.dart`: Complete Neumorphic UI with live search & facet chips
-  - `lib/main.dart`: Flutter entry point
-- `/src`: Live interactive companion simulator & architectural explorer (Vite + React + Tailwind)
+## Quick start
 
----
+### Backend
 
-## 🚀 Quick Start
-
-### 1. Backend
 ```bash
 cd backend
 npm install
-npm run seed  # Seeds 15 Kampala market items
-npm run dev   # Starts API server on port 5000
+cp .env.example .env
+# edit .env with your Firebase and Typesense credentials
+npm run seed
+npm run dev
 ```
 
-### 2. Mobile (Flutter)
+The API listens on `http://localhost:5000`. Endpoints:
+
+- `GET /health`
+- `GET /api/items`
+- `GET /api/items/:id`
+- `POST /api/items` (requires Firebase ID token when `REQUIRE_AUTH=true`)
+- `PUT /api/items/:id`
+- `PATCH /api/items/:id`
+- `DELETE /api/items/:id`
+
+### Mobile (Flutter)
+
 ```bash
 cd mobile
 flutter pub get
 flutter run
 ```
 
-### 3. Interactive Web Simulator
+Optional runtime configuration:
+
+```bash
+flutter run \
+  --dart-define=TYPESENSE_HOST=your-typesense-host \
+  --dart-define=TYPESENSE_PORT=443 \
+  --dart-define=TYPESENSE_PROTOCOL=https \
+  --dart-define=TYPESENSE_SEARCH_KEY=your-search-only-key
+```
+
+### Web companion
+
 ```bash
 npm install
 npm run dev
 ```
+
+## Design system: Violet Dusk Neumorphism
+
+- Background: `#1E1B2E`
+- Light shadow (top-left): `#2A2640`
+- Dark shadow (bottom-right): `#12101C`
+- Accent purple: `#9D4EDD`
+- Accent cyan: `#00F5D4`
+- Primary text: `#FFFFFF`
+- Secondary text: `#A09ABC`
+
+Neumorphic containers use dual box-shadows at `(-6, -6)` and `(6, 6)` with `BorderRadius.circular(20)`.
+
+## Environment variables
+
+See `backend/.env.example` for the full list. Key variables:
+
+- `PORT`, `NODE_ENV`, `CORS_ORIGIN`
+- `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`
+- `TYPESENSE_ADMIN_API_KEY` (backend only, never ship to clients)
+- `TYPESENSE_SEARCH_ONLY_API_KEY` (scoped search-only key for mobile clients)
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_PATH`
+- `REQUIRE_AUTH` (set to `true` in production)
+
+## Commit protocol
+
+Each file is committed independently so the history mirrors the build steps:
+
+1. `chore(backend): initialize Node.js environment and dependencies`
+2. `feat(backend): configure Typesense client and schema collection`
+3. `feat(backend): add Firebase Admin initialization and auth middleware`
+4. `feat(backend): implement Express API endpoints for Firestore and Typesense sync`
+5. `chore(backend): add database seed script for local market items`
+6. `chore(mobile): add Flutter dependencies for Typesense and UI components`
+7. `style(mobile): implement Violet Dusk Neumorphic theme and container widget`
+8. `feat(mobile): integrate Typesense search service with instant-search and faceted filtering`
+9. `feat(mobile): build DukaSearch Neumorphic home screen with live search UI`
+10. `chore(mobile): add app entrypoint and Riverpod search providers`
+11. `docs: document DukaSearch setup, architecture, and environment variables`
+
+## License
+
+Apache-2.0
