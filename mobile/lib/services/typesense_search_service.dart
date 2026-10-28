@@ -276,7 +276,7 @@ class TypesenseSearchService {
       );
 
       if (!enableDemoFallback) {
-        throw DukaSearchException(
+        throw const DukaSearchException(
           'Could not reach the DukaSearch index. Please try again.',
         );
       }

@@ -162,11 +162,11 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
             ],
           ),
           // Tactile Notification / Status Button
-          NeumorphicContainer(
+           const NeumorphicContainer(
             borderRadius: 14,
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             depth: 4,
-            child: const Icon(
+            child: Icon(
               Icons.storefront_rounded,
               color: NeumorphicThemeColors.accentPurple,
               size: 20,
