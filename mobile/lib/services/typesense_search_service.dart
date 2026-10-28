@@ -243,21 +243,21 @@ class TypesenseSearchService {
       }).toList();
 
       final facets = <String, List<FacetCount>>{};
-      final facetCounts = (response['facet_counts'] as List<dynamic>?) ?? const [];
+      final facetCounts =
+          (response['facet_counts'] as List<dynamic>?) ?? const [];
       for (final rawFacet in facetCounts) {
         final facet = rawFacet as Map<String, dynamic>;
         final fieldName = facet['field_name'] as String?;
         if (fieldName == null) continue;
 
-        facets[fieldName] = ((facet['counts'] as List<dynamic>?) ?? const [])
-            .map((rawCount) {
-              final count = rawCount as Map<String, dynamic>;
-              return FacetCount(
-                value: count['value']?.toString() ?? '',
-                count: (count['count'] as num?)?.toInt() ?? 0,
-              );
-            })
-            .toList();
+        facets[fieldName] =
+            ((facet['counts'] as List<dynamic>?) ?? const []).map((rawCount) {
+          final count = rawCount as Map<String, dynamic>;
+          return FacetCount(
+            value: count['value']?.toString() ?? '',
+            count: (count['count'] as num?)?.toInt() ?? 0,
+          );
+        }).toList();
       }
 
       return DukaSearchResult(
@@ -336,7 +336,8 @@ class TypesenseSearchService {
         marketLocation: 'Owino Market (St. Balikuddembe)',
         priceUgx: 28000,
         inStock: true,
-        description: 'Selected heavy denim vintage jackets in spotless condition.',
+        description:
+            'Selected heavy denim vintage jackets in spotless condition.',
       ),
       DukaItem(
         id: 'duka_item_004',
@@ -346,7 +347,8 @@ class TypesenseSearchService {
         marketLocation: 'Kikuubo Lane',
         priceUgx: 22000,
         inStock: true,
-        description: 'Pure unfiltered organic honey from the Queen Elizabeth basin.',
+        description:
+            'Pure unfiltered organic honey from the Queen Elizabeth basin.',
       ),
       DukaItem(
         id: 'duka_item_005',
@@ -356,7 +358,8 @@ class TypesenseSearchService {
         marketLocation: 'Katwe Metal Hub',
         priceUgx: 450000,
         inStock: true,
-        description: 'High-frequency solar inverter with built-in PWM controller.',
+        description:
+            'High-frequency solar inverter with built-in PWM controller.',
       ),
       DukaItem(
         id: 'duka_item_008',
@@ -366,7 +369,8 @@ class TypesenseSearchService {
         marketLocation: 'Owino Market (St. Balikuddembe)',
         priceUgx: 65000,
         inStock: true,
-        description: 'Vibrant colour-fast cotton wax print for traditional wear.',
+        description:
+            'Vibrant colour-fast cotton wax print for traditional wear.',
       ),
       DukaItem(
         id: 'duka_item_011',
