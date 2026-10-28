@@ -1,0 +1,29 @@
+{
+  "name": "dukasearch-backend",
+  "version": "1.0.0",
+  "description": "DukaSearch Data Processing & Sync Layer with Firebase Firestore & Typesense",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [
+    "dukasearch",
+    "typesense",
+    "firestore",
+    "firebase",
+    "kampala",
+    "instant-search"
+  ],
+  "author": "Lead Full-Stack Architect",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "firebase-admin": "^12.7.0",
+    "typesense": "^1.8.2"
+  }
+}
