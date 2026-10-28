@@ -79,10 +79,9 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
   void _updateFacetOptions() {
     final categoryValues =
         _facets['category']?.map((facet) => facet.value).toList() ?? const [];
-    final marketValues = _facets['market_location']
-            ?.map((facet) => facet.value)
-            .toList() ??
-        const [];
+    final marketValues =
+        _facets['market_location']?.map((facet) => facet.value).toList() ??
+            const [];
 
     if (categoryValues.isNotEmpty && _selectedCategory == 'All') {
       _categoryOptions = ['All', ...categoryValues];
@@ -102,8 +101,7 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
       _marketOptions = [
         'All',
         ...marketValues,
-        if (_selectedMarket != 'All' &&
-            !marketValues.contains(_selectedMarket))
+        if (_selectedMarket != 'All' && !marketValues.contains(_selectedMarket))
           _selectedMarket,
       ];
     }
@@ -236,7 +234,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                 color: NeumorphicThemeColors.darkShadow,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: NeumorphicThemeColors.accentCyan.withOpacity(0.3),
+                  color:
+                      NeumorphicThemeColors.accentCyan.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -268,9 +267,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
 
   Widget _buildStatusBanner() {
     final isError = _searchError != null;
-    final color = isError
-        ? const Color(0xFFFF6B8A)
-        : NeumorphicThemeColors.accentCyan;
+    final color =
+        isError ? const Color(0xFFFF6B8A) : NeumorphicThemeColors.accentCyan;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
@@ -347,7 +345,7 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? NeumorphicThemeColors.accentPurple.withOpacity(0.2)
+                    ? NeumorphicThemeColors.accentPurple.withValues(alpha: 0.2)
                     : NeumorphicThemeColors.background,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -359,7 +357,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: NeumorphicThemeColors.accentPurple.withOpacity(0.35),
+                          color: NeumorphicThemeColors.accentPurple
+                              .withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -384,7 +383,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                     cat,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected
                           ? NeumorphicThemeColors.textPrimary
                           : NeumorphicThemeColors.textSecondary,
@@ -399,7 +399,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? NeumorphicThemeColors.accentCyan
-                            : NeumorphicThemeColors.textSecondary.withOpacity(0.7),
+                            : NeumorphicThemeColors.textSecondary
+                                .withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -454,7 +455,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                     market,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: isSelected
                           ? NeumorphicThemeColors.textPrimary
                           : NeumorphicThemeColors.textSecondary,
@@ -554,7 +556,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
             Text(
               'Try adjusting your search terms or filters',
               style: TextStyle(
-                color: NeumorphicThemeColors.textSecondary.withOpacity(0.8),
+                color:
+                    NeumorphicThemeColors.textSecondary.withValues(alpha: 0.8),
                 fontSize: 13,
               ),
             ),
@@ -663,7 +666,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10,
-                    color: NeumorphicThemeColors.textSecondary.withOpacity(0.85),
+                    color: NeumorphicThemeColors.textSecondary
+                        .withValues(alpha: 0.85),
                   ),
                 ),
               ),
@@ -839,7 +843,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Icon(Icons.pin_drop_rounded, color: NeumorphicThemeColors.accentPurple, size: 16),
+                  const Icon(Icons.pin_drop_rounded,
+                      color: NeumorphicThemeColors.accentPurple, size: 16),
                   const SizedBox(width: 6),
                   Text(
                     '${item.marketLocation} · Vendor: ${item.vendorName}',
@@ -857,12 +862,14 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: NeumorphicThemeColors.accentPurple,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: () => Navigator.pop(ctx),
                   child: const Text(
                     'Contact Vendor via WhatsApp / Call',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
               ),
