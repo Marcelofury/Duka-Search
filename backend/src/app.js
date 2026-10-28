@@ -1,19 +1,29 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { createItem, deleteItem, listItems } from './controllers/itemController.js';
+import {
+  createItem,
+  deleteItem,
+  getItem,
+  listItems,
+  updateItem,
+} from './controllers/itemController.js';
 import { initTypesenseSchema } from './config/typesense.js';
+import { requireAuth } from './middleware/auth.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  }),
+);
+app.use(express.json({ limit: '1mb' }));
 
-// Routes
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -23,17 +33,19 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/items', listItems);
-app.post('/api/items', createItem);
-app.delete('/api/items/:id', deleteItem);
+app.get('/api/items/:id', getItem);
+app.post('/api/items', requireAuth, createItem);
+app.put('/api/items/:id', requireAuth, updateItem);
+app.patch('/api/items/:id', requireAuth, updateItem);
+app.delete('/api/items/:id', requireAuth, deleteItem);
 
-// Server initialization
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, async () => {
-    console.log(`🚀 DukaSearch API Server running on http://localhost:${PORT}`);
+    console.log(`DukaSearch API Server running on http://localhost:${PORT}`);
     try {
       await initTypesenseSchema();
     } catch (err) {
-      console.warn('⚠️ Typesense schema initialization skipped or failed:', err.message);
+      console.warn('Typesense schema initialization skipped or failed:', err.message);
     }
   });
 }
