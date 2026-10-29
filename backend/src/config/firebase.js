@@ -17,9 +17,15 @@ function initialiseFirebase() {
   }
 
   if (serviceAccountPath) {
-    return admin.initializeApp({
-      credential: admin.credential.cert(serviceAccountPath),
-    });
+    // If the value looks like JSON (starts with {), parse it directly.
+    // Otherwise treat it as a file path.
+    let credential;
+    if (serviceAccountPath.trim().startsWith('{')) {
+      credential = admin.credential.cert(JSON.parse(serviceAccountPath));
+    } else {
+      credential = admin.credential.cert(serviceAccountPath);
+    }
+    return admin.initializeApp({ credential });
   }
 
   // Application Default Credentials are used in Cloud Run, App Engine, or
