@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log*
+.DS_Store
+.env
+*.log
+.env.local
+.env.development
+.env.production
+service-account.json
+service-account*.json
+*.pem
+__pycache__
+*.pyc
+dist
+build

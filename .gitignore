@@ -6,6 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+.token
+service-account*.json
 
 mobile/.dart_tool/
 mobile/.flutter-plugins-dependencies
