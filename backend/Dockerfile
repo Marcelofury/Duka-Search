@@ -2,6 +2,12 @@
 
 FROM node:20-alpine
 
+# Install Typesense binary
+RUN apk add --no-cache wget && \
+    wget -q "https://github.com/typesense/typesense/releases/download/v0.24.1/typesense-0.24.1.x86_64" -O /usr/local/bin/typesense && \
+    chmod +x /usr/local/bin/typesense && \
+    apk del wget
+
 WORKDIR /app
 
 # Install dependencies first for better layer caching
@@ -15,11 +21,10 @@ COPY scripts ./scripts
 # Expose the port
 EXPOSE 5000
 
-# Run as non-root user for security
-# USER node (skip for permissions issues in some environments)
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
 
-CMD ["node", "src/app.js"]
+# Start Typesense in background, then run the Node app
+CMD typesense --data-dir=/data --api-key=xyz_admin_secret_key_dukasearch --port=8108 & \
+     node src/app.js
