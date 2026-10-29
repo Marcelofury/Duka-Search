@@ -59,8 +59,8 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
         _items = results.items;
         _facets = results.facets;
         _searchLatencyMs = results.searchTimeMs;
-        _usingDemoData = results.usedFallback;
-        _searchError = results.usedFallback ? null : results.errorMessage;
+        _usingDemoData = false;
+        _searchError = results.errorMessage;
         _isLoading = false;
         _updateFacetOptions();
       });
@@ -288,7 +288,9 @@ class _DukaSearchHomeScreenState extends ConsumerState<DukaSearchHomeScreen> {
               child: Text(
                 isError
                     ? _searchError!
-                    : 'Demo data active. Start Typesense to load live market results.',
+                    : (_searchError?.isNotEmpty == true
+                        ? _searchError!
+                        : 'No results found.'),
                 style: const TextStyle(
                   fontSize: 11,
                   color: NeumorphicThemeColors.textSecondary,

@@ -126,15 +126,15 @@ class TypesenseSearchService {
 
   static const String _host = String.fromEnvironment(
     'TYPESENSE_HOST',
-    defaultValue: 'localhost',
+    defaultValue: 'dukasearch-typesense.onrender.com',
   );
   static const int _port = int.fromEnvironment(
     'TYPESENSE_PORT',
-    defaultValue: 8108,
+    defaultValue: 443,
   );
   static const String _protocol = String.fromEnvironment(
     'TYPESENSE_PROTOCOL',
-    defaultValue: 'http',
+    defaultValue: 'https',
   );
   static const String _searchKey = String.fromEnvironment(
     'TYPESENSE_SEARCH_KEY',
@@ -150,7 +150,7 @@ class TypesenseSearchService {
     int? port,
     String? protocol,
     String? searchOnlyApiKey,
-    this.enableDemoFallback = true,
+    this.enableDemoFallback = false,
   }) {
     final resolvedProtocol = (protocol ?? _protocol).toLowerCase() == 'https'
         ? Protocol.https
@@ -277,7 +277,7 @@ class TypesenseSearchService {
 
       if (!enableDemoFallback) {
         throw const DukaSearchException(
-          'Could not reach the DukaSearch index. Please try again.',
+          'Could not reach the DukaSearch index. Check network/config.',
         );
       }
 
