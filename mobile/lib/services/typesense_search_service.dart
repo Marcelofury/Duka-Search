@@ -126,7 +126,7 @@ class TypesenseSearchService {
 
   static const String _host = String.fromEnvironment(
     'TYPESENSE_HOST',
-    defaultValue: 'dukasearch-typesense.onrender.com',
+    defaultValue: 'duka-search.onrender.com',
   );
   static const int _port = int.fromEnvironment(
     'TYPESENSE_PORT',
