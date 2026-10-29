@@ -1,0 +1,40 @@
+# Render Blueprint for DukaSearch Backend
+# Deploy with: `render blueprint deploy render.yaml`
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: dukasearch-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    dockerContext: .
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: FIREBASE_PROJECT_ID
+        value: duka-search
+      - key: REQUIRE_AUTH
+        value: "false"
+      - key: TYPESENSE_HOST
+        # Replace with your Typesense Cloud host (e.g. search-xxx.typesense.io)
+        # or keep localhost and run Typesense locally.
+        value: search-dukasearch.typesense.io
+      - key: TYPESENSE_PORT
+        value: "443"
+      - key: TYPESENSE_PROTOCOL
+        value: https
+      # ⚠️ Set these manually in Render dashboard for security:
+      # - TYPESENSE_ADMIN_API_KEY
+      # - TYPESENSE_SEARCH_ONLY_API_KEY
+      # - FIREBASE_SERVICE_ACCOUNT_JSON (inline JSON) or FIREBASE_SERVICE_ACCOUNT_PATH
+    rootDir: backend
+    buildCommand: npm ci --only=production
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    domains:
+      - dukasearch-backend.onrender.com
