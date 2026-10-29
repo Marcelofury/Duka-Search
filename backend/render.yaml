@@ -5,10 +5,10 @@
 services:
   - type: web
     name: dukasearch-backend
-    runtime: container
-    region: oregon # or singapore for lower latency to Kampala
-    plan: free
-    envVars:
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./backend
+    rootDir: .
       - key: NODE_ENV
         value: production
       - key: PORT
