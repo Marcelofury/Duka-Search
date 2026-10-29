@@ -3,20 +3,7 @@
 # Docs: https://render.com/docs/blueprint-spec
 
 services:
-  # Typesense search engine (runs as a managed service on Render)
-  - type: web
-    name: dukasearch-typesense
-    runtime: docker
-    image: typesense/typesense:latest
-    region: oregon
-    plan: free
-    envVars:
-      - key: TYPESENSE_API_KEY
-        value: xyz_admin_secret_key_dukasearch
-    healthCheckPath: /health
-    autoDeploy: true
-
-  # Backend API server
+  # Backend API server with Typesense bundled in the same container
   - type: web
     name: dukasearch-backend
     runtime: docker
@@ -35,9 +22,9 @@ services:
         value: duka-search
       - key: REQUIRE_AUTH
         value: "false"
-      # Typesense points to the internal dukasearch-typesense service
+      # Typesense runs locally inside the same container
       - key: TYPESENSE_HOST
-        value: dukasearch-typesense
+        value: localhost
       - key: TYPESENSE_PORT
         value: "8108"
       - key: TYPESENSE_PROTOCOL
