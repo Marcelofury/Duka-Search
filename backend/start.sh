@@ -1,6 +1,6 @@
 #!/bin/sh
 mkdir -p /data
-typesense-server --data-dir=/data --api-key=xyz_admin_secret_key_dukasearch --port=8108 --enable-cors &
+typesense-server --data-dir=/data --api-key=${TYPESENSE_ADMIN_API_KEY:-xyz_admin_secret_key_dukasearch} --port=8108 --enable-cors &
 TYPESENSE_PID=$!
 
 # Wait for Typesense to be ready
