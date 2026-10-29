@@ -66,7 +66,7 @@ Optional runtime configuration:
 
 ```bash
 flutter run \
-  --dart-define=API_BASE_URL=https://dukasearch-backend.onrender.com
+  --dart-define=API_BASE_URL=https://duka-search.onrender.com
 ```
 
 Search requests go through `GET /api/search` on the backend, so the Typesense

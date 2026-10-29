@@ -127,7 +127,7 @@ class TypesenseSearchService {
 
   static const String _defaultApiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://dukasearch-backend.onrender.com',
+    defaultValue: 'https://duka-search.onrender.com',
   );
 
   final bool enableDemoFallback;

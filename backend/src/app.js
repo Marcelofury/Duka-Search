@@ -8,7 +8,7 @@ import {
   listItems,
   updateItem,
 } from './controllers/itemController.js';
-import { initTypesenseSchema } from './config/typesense.js';
+import { initTypesenseSchema, typesenseClient } from './config/typesense.js';
 import { searchItems } from './controllers/searchController.js';
 import { requireAuth } from './middleware/auth.js';
 
@@ -31,6 +31,19 @@ app.get('/health', (req, res) => {
     service: 'dukasearch-backend',
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/health/typesense', async (req, res) => {
+  try {
+    await typesenseClient.health.retrieve();
+    return res.json({ status: 'ok' });
+  } catch (error) {
+    return res.status(503).json({
+      status: 'unavailable',
+      code: error.code || error.name,
+      message: error.message,
+    });
+  }
 });
 
 app.get('/api/search', searchItems);
