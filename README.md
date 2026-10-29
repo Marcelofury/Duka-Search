@@ -5,21 +5,21 @@ Hyper-local market discovery platform for Kampala trade items. DukaSearch indexe
 ## Architecture
 
 ```
-+-------------------------+        search-only key        +------------------+
-| Flutter mobile client   | ---------------------------> | Typesense Cloud  |
-| (Riverpod + Neumorphic) |                              | in-memory index  |
-+-----------+-------------+                              +--------+---------+
-            | write / auth (Firebase ID token)                    ^
-            v                                                    |
-+-------------------------+        dual write         +----------+---------+
-| Node.js + Express API   | -----------------------> | Firebase Firestore |
-| Firebase Admin SDK      |   Firestore + Typesense  | /duka_items        |
-+-------------------------+                          +--------------------+
++-------------------------+    HTTPS /api/search         +-----------------------+
+| Flutter mobile client   | ----------------------------> | Node.js + Express API |
+| (Riverpod + Neumorphic) |                               | (Render, Docker)      |
++-----------+-------------+                               +----+-------------+----+
+            | write / auth (Firebase ID token)                 |             |
+            v                                                  | dual write  |
++-------------------------+                      +-------------v--+  +-------v------+
+| Firebase Auth           |                      | Typesense      |  | Firestore    |
++-------------------------+                      | same container |  | /duka_items  |
+                                                 +----------------+  +--------------+
 ```
 
 - Source of truth: Firebase Cloud Firestore (`/duka_items`).
 - Data processing layer: Node.js + Express with Firebase Admin SDK and Typesense Node SDK.
-- Client layer: Flutter talks directly to Typesense Cloud using a scoped search-only API key for instant search.
+- Client layer: Flutter calls the backend `GET /api/search` proxy for instant search; the backend queries Typesense with the admin key.
 - Write and vendor operations go through the Express backend using Firebase Auth tokens.
 
 ## Repository layout
@@ -46,6 +46,7 @@ npm run dev
 The API listens on `http://localhost:5000`. Endpoints:
 
 - `GET /health`
+- `GET /api/search?q=&category=&market=&page=&per_page=`
 - `GET /api/items`
 - `GET /api/items/:id`
 - `POST /api/items` (requires Firebase ID token when `REQUIRE_AUTH=true`)
@@ -65,11 +66,11 @@ Optional runtime configuration:
 
 ```bash
 flutter run \
-  --dart-define=TYPESENSE_HOST=your-typesense-host \
-  --dart-define=TYPESENSE_PORT=443 \
-  --dart-define=TYPESENSE_PROTOCOL=https \
-  --dart-define=TYPESENSE_SEARCH_KEY=your-search-only-key
+  --dart-define=API_BASE_URL=https://dukasearch-backend.onrender.com
 ```
+
+Search requests go through `GET /api/search` on the backend, so the Typesense
+admin key never ships with the app.
 
 ### Web companion
 
@@ -96,8 +97,8 @@ See `backend/.env.example` for the full list. Key variables:
 
 - `PORT`, `NODE_ENV`, `CORS_ORIGIN`
 - `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`
-- `TYPESENSE_ADMIN_API_KEY` (backend only, never ship to clients)
-- `TYPESENSE_SEARCH_ONLY_API_KEY` (scoped search-only key for mobile clients)
+- `TYPESENSE_ADMIN_API_KEY` (backend only, set it in the Render dashboard with `sync: false`)
+- `TYPESENSE_SEARCH_ONLY_API_KEY` (legacy direct-access key; mobile now uses `/api/search`)
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_PATH`
 - `REQUIRE_AUTH` (set to `true` in production)

@@ -9,6 +9,7 @@ import {
   updateItem,
 } from './controllers/itemController.js';
 import { initTypesenseSchema } from './config/typesense.js';
+import { searchItems } from './controllers/searchController.js';
 import { requireAuth } from './middleware/auth.js';
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/api/search', searchItems);
 app.get('/api/items', listItems);
 app.get('/api/items/:id', getItem);
 app.post('/api/items', requireAuth, createItem);

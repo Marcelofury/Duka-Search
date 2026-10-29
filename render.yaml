@@ -24,13 +24,14 @@ services:
         value: "false"
       # Typesense runs locally inside the same container
       - key: TYPESENSE_HOST
-        value: 46.224.167.72
+        value: 127.0.0.1
       - key: TYPESENSE_PORT
         value: "8108"
       - key: TYPESENSE_PROTOCOL
         value: http
+      # Set this in the Render dashboard; never commit the admin key.
       - key: TYPESENSE_ADMIN_API_KEY
-        value: 4xA3sri11TfYrHc6t8Lf9ctOvUFq5ujG
+        sync: false
       - key: TYPESENSE_SEARCH_ONLY_API_KEY
         value: xyz_search_only_key_dukasearch
       # ⚠️ Set these manually in Render dashboard for security:

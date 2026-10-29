@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 
-import 'package:typesense/typesense.dart';
+import 'package:http/http.dart' as http;
 
 /// Data model representing an item in DukaSearch.
 class DukaItem {
@@ -114,62 +115,33 @@ class DukaSearchException implements Exception {
   String toString() => message;
 }
 
-/// Typesense search service using a scoped Search-Only API key.
+/// Search service backed by the DukaSearch API proxy.
+///
+/// The mobile client never talks to Typesense directly: the admin API key
+/// stays on the server and search requests go through `GET /api/search`.
 ///
 /// Configure with --dart-define:
-///   TYPESENSE_HOST
-///   TYPESENSE_PORT
-///   TYPESENSE_PROTOCOL
-///   TYPESENSE_SEARCH_KEY
+///   API_BASE_URL (e.g. https://dukasearch-backend.onrender.com)
 class TypesenseSearchService {
   static const String collectionName = 'duka_items';
 
-  static const String _host = String.fromEnvironment(
-    'TYPESENSE_HOST',
-    defaultValue: '46.224.167.72',
-  );
-  static const int _port = int.fromEnvironment(
-    'TYPESENSE_PORT',
-    defaultValue: 8108,
-  );
-  static const String _protocol = String.fromEnvironment(
-    'TYPESENSE_PROTOCOL',
-    defaultValue: 'http',
-  );
-  static const String _searchKey = String.fromEnvironment(
-    'TYPESENSE_SEARCH_KEY',
-    defaultValue: 'xyz_search_only_key_dukasearch',
+  static const String _defaultApiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://dukasearch-backend.onrender.com',
   );
 
   final bool enableDemoFallback;
-  late final Client _client;
+  final String _apiBaseUrl;
+  final http.Client _httpClient;
   int _requestSequence = 0;
 
   TypesenseSearchService({
-    String? host,
-    int? port,
-    String? protocol,
-    String? searchOnlyApiKey,
+    String? apiBaseUrl,
+    http.Client? httpClient,
     this.enableDemoFallback = false,
-  }) {
-    final resolvedProtocol = (protocol ?? _protocol).toLowerCase() == 'https'
-        ? Protocol.https
-        : Protocol.http;
-
-    final config = Configuration(
-      searchOnlyApiKey ?? _searchKey,
-      nodes: {
-        Node(
-          resolvedProtocol,
-          host ?? _host,
-          port: port ?? _port,
-        ),
-      },
-      connectionTimeout: const Duration(seconds: 4),
-    );
-
-    _client = Client(config);
-  }
+  })  : _apiBaseUrl = (apiBaseUrl ?? _defaultApiBaseUrl)
+            .replaceAll(RegExp(r'/+$'), ''),
+        _httpClient = httpClient ?? http.Client();
 
   /// Instant search with 300ms debouncing, typo tolerance and faceted filters.
   Future<DukaSearchResult> searchItems({
@@ -193,40 +165,25 @@ class TypesenseSearchService {
     final stopwatch = Stopwatch()..start();
 
     try {
-      final filterConditions = <String>[];
-      final safeCategory = _escapeFilterValue(categoryFilter);
-      final safeMarket = _escapeFilterValue(marketFilter);
+      final uri = Uri.parse('$_apiBaseUrl/api/search').replace(
+        queryParameters: {
+          'q': trimmedQuery,
+          'page': '$page',
+          'per_page': '$perPage',
+          if (categoryFilter != null &&
+              categoryFilter.trim().isNotEmpty &&
+              categoryFilter != 'All')
+            'category': categoryFilter.trim(),
+          if (marketFilter != null &&
+              marketFilter.trim().isNotEmpty &&
+              marketFilter != 'All')
+            'market': marketFilter.trim(),
+        },
+      );
 
-      if (safeCategory != null) {
-        filterConditions.add('category:=`$safeCategory`');
-      }
-      if (safeMarket != null) {
-        filterConditions.add('market_location:=`$safeMarket`');
-      }
-
-      final searchParameters = <String, dynamic>{
-        'q': trimmedQuery.isEmpty ? '*' : trimmedQuery,
-        'query_by': 'name,category,vendor_name,market_location,description',
-        'query_by_weights': '5,2,3,3,1',
-        'num_typos': '2',
-        'typo_tokens_threshold': '1',
-        'drop_tokens_threshold': '1',
-        'facet_by': 'category,market_location',
-        'max_facet_values': '20',
-        'highlight_fields': 'name',
-        'per_page': '$perPage',
-        'page': '$page',
-        'sort_by': trimmedQuery.isEmpty
-            ? 'price_ugx:asc'
-            : '_text_match:desc,price_ugx:asc',
-        if (filterConditions.isNotEmpty)
-          'filter_by': filterConditions.join(' && '),
-      };
-
-      final response =
-          await _client.collection(collectionName).documents.search(
-                searchParameters,
-              );
+      final response = await _httpClient
+          .get(uri, headers: const {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 8));
 
       stopwatch.stop();
 
@@ -234,7 +191,19 @@ class TypesenseSearchService {
         return DukaSearchResult.cancelled(requestId);
       }
 
-      final hits = (response['hits'] as List<dynamic>?) ?? const [];
+      if (response.statusCode != 200) {
+        throw DukaSearchException(
+          'Search failed with status ${response.statusCode}.',
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw const DukaSearchException('Search returned an invalid response.');
+      }
+      final responseBody = decoded;
+
+      final hits = (responseBody['hits'] as List<dynamic>?) ?? const [];
       final items = hits.map((hit) {
         final hitMap = hit as Map<String, dynamic>;
         final document = hitMap['document'] as Map<String, dynamic>;
@@ -244,7 +213,7 @@ class TypesenseSearchService {
 
       final facets = <String, List<FacetCount>>{};
       final facetCounts =
-          (response['facet_counts'] as List<dynamic>?) ?? const [];
+          (responseBody['facet_counts'] as List<dynamic>?) ?? const [];
       for (final rawFacet in facetCounts) {
         final facet = rawFacet as Map<String, dynamic>;
         final fieldName = facet['field_name'] as String?;
@@ -263,9 +232,9 @@ class TypesenseSearchService {
       return DukaSearchResult(
         items: items,
         facets: facets,
-        searchTimeMs: (response['search_time_ms'] as num?)?.toInt() ??
+        searchTimeMs: (responseBody['search_time_ms'] as num?)?.toInt() ??
             stopwatch.elapsedMilliseconds,
-        totalFound: (response['found'] as num?)?.toInt() ?? items.length,
+        totalFound: (responseBody['found'] as num?)?.toInt() ?? items.length,
         requestId: requestId,
       );
     } catch (error) {
@@ -290,13 +259,6 @@ class TypesenseSearchService {
         requestId: requestId,
       );
     }
-  }
-
-  String? _escapeFilterValue(String? value) {
-    if (value == null) return null;
-    final trimmed = value.trim();
-    if (trimmed.isEmpty || trimmed == 'All') return null;
-    return trimmed.replaceAll('`', '');
   }
 
   DukaSearchResult _fallbackResult({
