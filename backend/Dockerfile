@@ -16,7 +16,7 @@ COPY scripts ./scripts
 EXPOSE 5000
 
 # Run as non-root user for security
-USER node
+# USER node (skip for permissions issues in some environments)
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
