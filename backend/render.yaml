@@ -49,7 +49,6 @@ services:
       # ⚠️ Set these manually in Render dashboard for security:
       # - FIREBASE_SERVICE_ACCOUNT_JSON (inline JSON) or FIREBASE_SERVICE_ACCOUNT_PATH
     buildCommand: npm ci --only=production
-    startCommand: node src/app.js
     healthCheckPath: /health
     autoDeploy: true
     domains:
