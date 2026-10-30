@@ -43,6 +43,10 @@ npm run seed
 npm run dev
 ```
 
+On startup the backend creates the Typesense collection and, when it is empty,
+reindexes all items from Firestore. Run `npm run reindex` to force a full
+reindex at any time.
+
 The API listens on `http://localhost:5000`. Endpoints:
 
 - `GET /health`

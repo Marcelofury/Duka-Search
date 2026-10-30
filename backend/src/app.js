@@ -10,6 +10,7 @@ import {
 } from './controllers/itemController.js';
 import { initTypesenseSchema, typesenseClient } from './config/typesense.js';
 import { searchItems } from './controllers/searchController.js';
+import { reindexFromFirestore } from './services/reindex.js';
 import { requireAuth } from './middleware/auth.js';
 
 dotenv.config();
@@ -59,8 +60,9 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`DukaSearch API Server running on http://localhost:${PORT}`);
     try {
       await initTypesenseSchema();
+      await reindexFromFirestore();
     } catch (err) {
-      console.warn('Typesense schema initialization skipped or failed:', err.message);
+      console.warn('Typesense startup sync skipped or failed:', err.message);
     }
   });
 }
