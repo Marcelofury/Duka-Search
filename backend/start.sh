@@ -34,6 +34,8 @@ echo "Starting Typesense ${TYPESENSE_VERSION} on port ${TYPESENSE_PORT}..."
 "$TYPESENSE_BIN" \
   --data-dir="$TYPESENSE_DATA_DIR" \
   --api-key="${TYPESENSE_ADMIN_API_KEY:-xyz_admin_secret_key_dukasearch}" \
+  --api-address=127.0.0.1 \
+  --peering-address=127.0.0.1 \
   --port="$TYPESENSE_PORT" \
   --enable-cors &
 TYPESENSE_PID=$!
